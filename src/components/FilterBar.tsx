@@ -1,4 +1,4 @@
-import type { Filter } from "../types.ts";
+import type { Filter } from "../types";
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "Toutes" },

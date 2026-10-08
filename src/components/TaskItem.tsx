@@ -1,10 +1,10 @@
-import { STATUS_LABEL, type Task } from "../types.ts";
+import { STATUS_LABEL, type Task } from "../types";
 
 type Props = {
-    task: Task;
-    onCycle: (id: string) => void;
-    onRemove: (id: string) => void;
-}
+  task: Task;
+  onCycle: (id: string) => void;
+  onRemove: (id: string) => void;
+};
 
 export function TaskItem({ task, onCycle, onRemove }: Props) {
   return (
