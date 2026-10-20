@@ -1,26 +1,10 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-
-import { nextStatus, type Filter, type Priority, type Task, type Status } from "./types";
-import { FilterBar } from "./components/FilterBar";
-import { TaskForm } from "./components/TaskForm";
-import { TaskList } from "./components/TaskList";
-import { Card } from "./components/Card";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-import { ThemeToggle } from "./components/ThemeToggle";
-import { ThemeProvider } from "./context/ThemeContext.tsx";
-import { FocusTimer } from "./components/FocusTimer.tsx";
-
 import { Route, Routes, useParams } from "react-router";
-import { Layout } from './components/Layout.tsx';
-import { ProjectsPage } from './pages/ProjectPages.tsx';
-import { NewProjectPage } from './pages/NewProjectPage.tsx';
-import { NotFoundPage } from './pages/NotFoundPage.tsx';
-import { AboutPage } from "./pages/AboutPage";
+import { Layout } from "./components/Layout";
+import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectPage } from "./pages/ProjectPage";
-
-const next = (s: Status): Status =>
-  s === "todo" ? "doing" : s === "doing" ? "done" : "todo";
+import { NewProjectPage } from "./pages/NewProjectPage";
+import { AboutPage } from "./pages/AboutPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 export default function App() {
   return (
@@ -41,52 +25,3 @@ function ProjectRoute() {
   const { id = "" } = useParams();
   return <ProjectPage key={id} id={id} />;
 }
-
-export function Board() {
-  // Tâches sauvegardées dans le navigateur (hook personnalisé)
-  const [tasks, setTasks] = useLocalStorage<Task[]>(
-    "taskflow-tasks",
-    [],
-  );
-  const [filter, setFilter] = useState<Filter>("all");
-
-  const visible =
-    filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
-  const remaining = tasks.filter((t) => t.status !== "done").length;
-  // Synchroniser le titre de l'onglet avec les tâches restantes
-  useEffect(() => {
-    document.title =
-      remaining > 0 ? `(${remaining}) TaskFlow` : "TaskFlow";
-  }, [remaining]);
-
-  function add(title: string, priority: Priority) {
-    setTasks((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), title, status: "todo", priority },
-    ]);
-  }
-
-  const cycle = (id: string) =>
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: next(t.status) } : t))
-    );
-
-  const remove = (id: string) =>
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-
-  return (
-    <main className="app">
-      <h1>
-        TaskFlow <small>{remaining} restante(s)</small>
-      </h1>
-      <ThemeToggle />
-      <Card title='Timer'>
-        <FocusTimer />
-      </Card>
-      <TaskForm onAdd={add} />
-      <FilterBar value={filter} onChange={setFilter} />
-      <TaskList tasks={visible} onCycle={cycle} onRemove={remove} />
-    </main>
-  );
-}
-
