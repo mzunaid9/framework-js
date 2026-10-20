@@ -1,122 +1,92 @@
-import { useState } from "react";
-import heroImg from "./assets/hero.png";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import "./App.css";
+import { useState, useEffect } from 'react'
+import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0);
+import { nextStatus, type Filter, type Priority, type Task, type Status } from "./types";
+import { FilterBar } from "./components/FilterBar";
+import { TaskForm } from "./components/TaskForm";
+import { TaskList } from "./components/TaskList";
+import { Card } from "./components/Card";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { ThemeToggle } from "./components/ThemeToggle";
+import { ThemeProvider } from "./context/ThemeContext.tsx";
+import { FocusTimer } from "./components/FocusTimer.tsx";
 
+import { Route, Routes, useParams } from "react-router";
+
+const INITIAL_TASKS: Task[] = [
+  { id: "t1", title: "Installer Node.js 22", status: "done", priority: 1 },
+  { id: "t2", title: "Lire la doc useState", status: "done", priority: 2 },
+  { id: "t3", title: "Terminer le TP1", status: "done", priority: 1 },
+]
+
+const next = (s: Status): Status =>
+  s === "todo" ? "doing" : s === "doing" ? "done" : "todo";
+
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <Routes>
+      {/* Route « parent » : le Layout entoure toutes les pages */}
+      <Route element={<Layout />}>
+        <Route index element={<ProjectsPage />} />
+        <Route path="projects/new" element={<NewProjectPage />} />
+        <Route path="projects/:id" element={<ProjectRoute />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }
 
-export default App;
+function ProjectRoute() {
+  const { id = "" } = useParams();
+  return <ProjectPage key={id} id={id} />;
+}
+
+function Board() {
+  // Tâches sauvegardées dans le navigateur (hook personnalisé)
+  const [tasks, setTasks] = useLocalStorage<Task[]>(
+    "taskflow-tasks",
+    [],
+  );
+  const [filter, setFilter] = useState<Filter>("all");
+
+  const visible =
+    filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
+  const remaining = tasks.filter((t) => t.status !== "done").length;
+  // Synchroniser le titre de l'onglet avec les tâches restantes
+  useEffect(() => {
+    document.title =
+      remaining > 0 ? `(${remaining}) TaskFlow` : "TaskFlow";
+  }, [remaining]);
+
+  function add(title: string, priority: Priority) {
+    setTasks((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), title, status: "todo", priority },
+    ]);
+  }
+
+  const cycle = (id: string) =>
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, status: next(t.status) } : t))
+    );
+
+  const remove = (id: string) =>
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+
+  return (
+    <main className="app">
+      <h1>
+        TaskFlow <small>{remaining} restante(s)</small>
+      </h1>
+      <ThemeToggle />
+      <Card title='Timer'>
+        <FocusTimer />
+      </Card>
+      <TaskForm onAdd={add} />
+      <FilterBar value={filter} onChange={setFilter} />
+      <TaskList tasks={visible} onCycle={cycle} onRemove={remove} />
+    </main>
+  );
+}
+
