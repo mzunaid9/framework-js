@@ -1,0 +1,13 @@
+{
+  "projects": [
+    { "id": "site-esiee", "name": "Refonte site ESIEE-IT", "description": "Nouvelle vitrine pour la rentrée." },
+    { "id": "app-bde", "name": "Application mobile BDE", "description": "Billetterie et agenda des événements." }
+  ],
+  "tasks": [
+    { "id": "t1", "projectId": "site-esiee", "title": "Maquettes de la page d'accueil", "status": "done", "priority": 1 },
+    { "id": "t2", "projectId": "site-esiee", "title": "Intégrer le formulaire de contact", "status": "doing", "priority": 2 },
+    { "id": "t3", "projectId": "site-esiee", "title": "Rédiger les mentions légales", "status": "todo", "priority": 3 },
+    { "id": "t4", "projectId": "app-bde", "title": "Choisir la technologie", "status": "done", "priority": 1 },
+    { "id": "t5", "projectId": "app-bde", "title": "Écran de connexion", "status": "todo", "priority": 2 }
+  ]
+}
