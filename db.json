@@ -4,8 +4,21 @@
       "id": "site-esiee",
       "name": "Refonte site ESIEE-IT",
       "description": "Nouvelle vitrine pour la rentrée."
+    },
+    {
+      "name": "fff",
+      "description": "zzz",
+      "id": "H6ok4JqOBUU"
     }
   ],
-  "tasks": [],
+  "tasks": [
+    {
+      "projectId": "H6ok4JqOBUU",
+      "title": "faire",
+      "status": "todo",
+      "priority": 2,
+      "id": "Y3AWWBTRABk"
+    }
+  ],
   "$schema": "./node_modules/json-server/schema.json"
 }
